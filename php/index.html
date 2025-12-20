@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis Algoritma Luhn - Grafik Kiri</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-chart-line"></i> Analisis Algoritma Luhn</h1>
+                <p>Perbandingan Konsisten: Iteratif vs Rekursif</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- PANEL KIRI: GRAFIK -->
+            <div class="left-panel">
+                <section class="chart-section">
+                    <div class="chart-header">
+                        <h2><i class="fas fa-chart-line"></i> Grafik Perbandingan</h2>
+                        <div class="chart-controls">
+                            <button class="chart-btn" onclick="clearChart()">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="chart-btn" onclick="toggleChartType()">
+                                <i class="fas fa-exchange-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="timeChart"></canvas>
+                    </div>
+                    <div class="chart-info">
+                        <div class="info-item">
+                            <span class="info-label">Data Points:</span>
+                            <span class="info-value" id="dataPoints">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Status:</span>
+                            <span class="info-value" id="chartStatus">Siap</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Mode:</span>
+                            <span class="info-value" id="chartMode">Linear</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- PANEL KANAN: KONTROL & IMPLEMENTASI -->
+            <div class="right-panel">
+                <section class="control-panel">
+                    <h2><i class="fas fa-cogs"></i> Konfigurasi</h2>
+                    
+                    <div class="config-section">
+                        <div class="input-group">
+                            <label><i class="fas fa-database"></i> Ukuran Data Minimum</label>
+                            <input type="number" id="minData" value="100" min="10" max="10000" step="10">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label><i class="fas fa-database"></i> Ukuran Data Maksimum</label>
+                            <input type="number" id="maxData" value="1000" min="100" max="50000" step="10">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label><i class="fas fa-steps"></i> Jumlah Titik Data</label>
+                            <input type="range" id="dataSteps" min="5" max="20" value="10">
+                            <div class="step-display">
+                                <span id="stepValue">10</span> titik
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label><i class="fas fa-repeat"></i> Pengulangan per Titik</label>
+                            <div class="iteration-buttons">
+                                <button class="iter-btn" onclick="setIterations(1)">1x</button>
+                                <button class="iter-btn" onclick="setIterations(3)">3x</button>
+                                <button class="iter-btn active" onclick="setIterations(5)">5x</button>
+                                <button class="iter-btn" onclick="setIterations(10)">10x</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-section">
+                        <button class="run-btn" onclick="runTest()">
+                            <i class="fas fa-play"></i> JALANKAN TES
+                        </button>
+                        <button class="reset-btn" onclick="resetAll()">
+                            <i class="fas fa-redo"></i> RESET
+                        </button>
+                    </div>
+                </section>
+                
+                <section class="results-panel">
+                    <h2><i class="fas fa-chart-bar"></i> Hasil</h2>
+                    <div class="results-grid">
+                        <div class="result-item">
+                            <div class="result-label">Iteratif</div>
+                            <div class="result-value" id="iterativeTime">0.00 ms</div>
+                            <div class="result-percent" id="iterativePercent">0%</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Rekursif</div>
+                            <div class="result-value" id="recursiveTime">0.00 ms</div>
+                            <div class="result-percent" id="recursivePercent">0%</div>
+                        </div>
+                        <div class="result-item highlight">
+                            <div class="result-label">Percepatan</div>
+                            <div class="result-value" id="speedupFactor">1.00x</div>
+                            <div class="result-desc">Iteratif lebih cepat</div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="algorithm-section">
+                    <h2><i class="fas fa-code"></i> Implementasi</h2>
+                    <div class="algorithm-tabs">
+                        <button class="algo-tab active" onclick="showAlgorithm('iterative')">
+                            <i class="fas fa-redo"></i> Iteratif
+                        </button>
+                        <button class="algo-tab" onclick="showAlgorithm('recursive')">
+                            <i class="fas fa-infinity"></i> Rekursif
+                        </button>
+                    </div>
+                    <div class="algorithm-content">
+                        <pre id="iterative-code" class="algorithm-code active"><code>function luhnIterative(cardNumber) {
+    let total = 0;
+    let isEven = false;
+    
+    for (let i = cardNumber.length - 1; i >= 0; i--) {
+        let digit = parseInt(cardNumber[i]);
+        
+        if (isEven) {
+            digit *= 2;
+            if (digit > 9) digit -= 9;
+        }
+        
+        total += digit;
+        isEven = !isEven;
+    }
+    
+    return total % 10 === 0;
+}</code></pre>
+                        
+                        <pre id="recursive-code" class="algorithm-code"><code>function luhnRecursive(cardNumber, 
+                       index = 0, 
+                       total = 0, 
+                       isEven = false) {
+    
+    if (index >= cardNumber.length) {
+        return total % 10 === 0;
+    }
+    
+    const reverseIndex = cardNumber.length - index - 1;
+    let digit = parseInt(cardNumber[reverseIndex]);
+    
+    if (isEven) {
+        digit *= 2;
+        if (digit > 9) digit -= 9;
+    }
+    
+    return luhnRecursive(cardNumber,
+                         index + 1,
+                         total + digit,
+                         !isEven);
+}</code></pre>
+                    </div>
+                    <button class="copy-btn" onclick="copyCurrentAlgorithm()">
+                        <i class="far fa-copy"></i> Salin Kode
+                    </button>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
